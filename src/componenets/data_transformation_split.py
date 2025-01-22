@@ -50,7 +50,7 @@ class DataTranfomationSplit():
             df['date'] = pd.to_datetime(df['ID'].str.split('_', expand=True)[1])
             logging.info('Create the Date column from ID')
 
-            df.drop(['climate_swe', 'landcover_3'], axis=1, inplace=True)
+            df.drop(['climate_swe', 'landcover_3', 'ID'], axis=1, inplace=True)
             logging.info('The columns were dropped!')
 
             processor = self.get_transformer_obj()
@@ -59,6 +59,9 @@ class DataTranfomationSplit():
 
             df_with_date_lag_feats.dropna(inplace=True)
             logging.info('NAN rows were dropped.')
+
+            df_with_date_lag_feats.drop(['date'],axis=1,inplace=True)
+            logging.info('Dropped the Date column.')
         
             train_set, test_set = train_test_split(df_with_date_lag_feats, test_size=0.2, random_state=42)
             train_set.to_csv(self.data_transformation_config.train_data_path, index=False, header=True)

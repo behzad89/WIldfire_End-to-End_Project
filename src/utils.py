@@ -1,5 +1,11 @@
 import pandas as pd
+
+from sklearn.metrics import (mean_absolute_error, 
+                            root_mean_squared_error, 
+                            r2_score)
+
 from src.exception import CustomException
+from src.logger import logging
 import sys,os,pickle
 
 def lag_generator(df:pd.DataFrame)->pd.DataFrame:
@@ -34,3 +40,32 @@ def save_object(file_path, obj):
 
     except Exception as e:
         raise CustomException(e, sys)
+    
+
+def eveluate_model(X_train,
+                   y_train,
+                   X_test,
+                   y_test,
+                   models):
+    
+    try:
+        report={}
+
+        for m in range(len(list(models))):
+            model=list(models.values())[m]
+            model.fit(X_train,y_train)
+
+            y_train_pred = model.predict(X_train) 
+            y_test_pred = model.predict(X_test)
+
+            train_model_score = r2_score(y_train,y_train_pred)
+            test_model_score = r2_score(y_test,y_test_pred)
+
+            report[list(models.keys())[m]] = {
+                'train_score': train_model_score,
+                'test_score': test_model_score
+                }
+
+        return report
+    except Exception as e:
+        logging.error(CustomException(e,sys))
