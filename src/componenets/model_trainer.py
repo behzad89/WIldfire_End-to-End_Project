@@ -3,9 +3,6 @@ import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import (mean_absolute_error, 
-                            root_mean_squared_error, 
-                            r2_score)
 
 from dataclasses import dataclass
 from src.utils import save_object, eveluate_model
@@ -17,6 +14,20 @@ import os,sys
 class ModelTrainConfig:
     trained_model_file_path = os.path.join('artifacts','model.pkl')
     report_file_path = os.path.join('artifacts','model_scores_report.csv')
+
+
+
+params={
+    "Linear Regression":{},
+    
+    "Random Forest":{
+                    # 'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+                 
+                    # 'max_features':['sqrt','log2',None],
+                    # 'n_estimators': [8,16,32,64,128,256]
+                    'n_estimators': [8,16]
+    }
+}
 
 class ModelTrainer:
     def __init__(self):
@@ -39,7 +50,8 @@ class ModelTrainer:
                                         y_train,
                                         X_test,
                                         y_test,
-                                        models)
+                                        models,
+                                        params)
             
             df_report = pd.DataFrame.from_dict(model_report, orient='index')
 

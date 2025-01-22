@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.metrics import (mean_absolute_error, 
                             root_mean_squared_error, 
                             r2_score)
+from sklearn.model_selection import GridSearchCV
 
 from src.exception import CustomException
 from src.logger import logging
@@ -46,13 +47,24 @@ def eveluate_model(X_train,
                    y_train,
                    X_test,
                    y_test,
-                   models):
+                   models,
+                   params):
     
     try:
         report={}
 
         for m in range(len(list(models))):
             model=list(models.values())[m]
+            param=list(params.values())[m]
+            
+            gs = GridSearchCV(estimator=model,
+                              param_grid=param,
+                              cv=3,
+                              n_jobs=-1)
+            
+            gs.fit(X_train,y_train)
+
+            model.set_params(**gs.best_params_)
             model.fit(X_train,y_train)
 
             y_train_pred = model.predict(X_train) 
@@ -69,3 +81,11 @@ def eveluate_model(X_train,
         return report
     except Exception as e:
         logging.error(CustomException(e,sys))
+
+def load_model(file_path):
+    try:
+        with open(file_path, "rb") as file_obj:
+            return pickle.load(file_obj)
+
+    except Exception as e:
+        raise CustomException(e, sys)

@@ -21,7 +21,7 @@ class DataTransformationSplitConfig:
 
 class DataTranfomationSplit():
     def __init__(self):
-        self.data_transformation_config = DataTransformationSplitConfig()
+        self.data_transformation_split_config = DataTransformationSplitConfig()
 
     def get_transformer_obj(self):
         try:
@@ -42,7 +42,7 @@ class DataTranfomationSplit():
         except Exception as e:
             raise CustomException(e,sys)
    
-    def data_transformation_split(self,data_path:str):
+    def data_transformation(self,data_path:str):
         try:
             df = pd.read_csv(data_path)
             logging.info('Reading the data is completed.')
@@ -57,22 +57,30 @@ class DataTranfomationSplit():
             df_with_date_lag_feats = processor.fit_transform(df)
             logging.info('Temporal & lag features were created!')
 
-            df_with_date_lag_feats.dropna(inplace=True)
-            logging.info('NAN rows were dropped.')
+            df_with_date_lag_feats.bfill(inplace=True)
+            logging.info('NAN rows were Filled.')
 
             df_with_date_lag_feats.drop(['date'],axis=1,inplace=True)
             logging.info('Dropped the Date column.')
-        
-            train_set, test_set = train_test_split(df_with_date_lag_feats, test_size=0.2, random_state=42)
-            train_set.to_csv(self.data_transformation_config.train_data_path, index=False, header=True)
-            test_set.to_csv(self.data_transformation_config.test_data_path, index=False, header=True)
-            logging.info('Train-Test data were split.')
-
+            
             save_object(
-                file_path=self.data_transformation_config.preprocessor_obj_file_path,
+                file_path=self.data_transformation_split_config.preprocessor_obj_file_path,
                 obj=processor
             )
             logging.info('Transformation was saved.')
+
+            return df_with_date_lag_feats
+        
+        except Exception as e:
+            logging.error(CustomException(e,sys))
+
+    def data_split(self,data_path:str):
+        try:
+            df = self.data_transformation(data_path)
+            train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+            train_set.to_csv(self.data_transformation_split_config.train_data_path, index=False, header=True)
+            test_set.to_csv(self.data_transformation_split_config.test_data_path, index=False, header=True)
+            logging.info('Train-Test data were split.')
 
             return (train_set, test_set)
         

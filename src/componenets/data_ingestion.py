@@ -31,16 +31,3 @@ class DataIngenstion:
             return self.ingestion_config.raw_data_path
         except Exception as e:
             logging.error( CustomException(e,sys))
-            
-        
-
-from src.componenets.data_transformation_split import DataTranfomationSplit,DataTransformationSplitConfig 
-from src.componenets.model_trainer import ModelTrainer
-        
-if __name__ == '__main__':
-    obj = DataIngenstion()
-    data_path = obj.initiate_data_ingestion()
-    transformation = DataTranfomationSplit()
-    trainset, testset = transformation.data_transformation_split(data_path)
-    modeltrainer = ModelTrainer()
-    print(modeltrainer.model_train(trainset, testset))
